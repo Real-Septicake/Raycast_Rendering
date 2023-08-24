@@ -1,5 +1,3 @@
-package Ortho;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -23,7 +21,7 @@ public class Game extends JPanel implements KeyListener, ActionListener {
 
     static boolean w = false, a = false, s = false, d = false;
 
-    static double pa = 0;
+    static double pa = P2;
 
     static double posX = SQUARE_SIZE*1.5, posY = SQUARE_SIZE*1.5;
     static double deltaX = Math.cos(pa), deltaY = Math.sin(pa);
@@ -74,7 +72,7 @@ public class Game extends JPanel implements KeyListener, ActionListener {
         double rayX, rayY, rayAngle = pa - DEG_TO_RAD*30, xOffset = 0, yOffset = 0, disT = 0;
         if(rayAngle < 0) rayAngle += PI2;
         if(rayAngle > PI2) rayAngle -= PI2;
-        for(r = 0; r < 120; r++){
+        for(r = 0; r < 240; r++){
             //HORIZONTAL CHECK
             dof = 0;
             double disH = Integer.MAX_VALUE, hx = posX, hy = posY;
@@ -142,8 +140,8 @@ public class Game extends JPanel implements KeyListener, ActionListener {
                 }
             }
             g2d.setStroke(new BasicStroke(2));
-            if(disV < disH) { rayX = vx; rayY = vy; g2d.setColor(new Color(211, 0, 0)); disT = disV; }
-            if(disH < disV) { rayX = hx; rayY = hy; g2d.setColor(new Color(168, 0, 0)); disT = disH; }
+            if(disV < disH) { rayX = vx; rayY = vy; g2d.setColor(new Color(116, 218, 188)); disT = disV; }
+            if(disH < disV) { rayX = hx; rayY = hy; g2d.setColor(new Color(91, 171, 147)); disT = disH; }
 //            g2d.drawLine((int)posX, (int)posY, (int)rayX, (int)rayY);
             //DRAW WALLS
             double ca = pa - rayAngle;
@@ -153,9 +151,9 @@ public class Game extends JPanel implements KeyListener, ActionListener {
             double lineH = (SQUARE_SIZE*480)/disT;
             if(lineH > 480) lineH = 480;
             double lineO = (240-lineH/2);
-            g2d.setStroke(new BasicStroke(8));
-            g2d.drawLine(r*8, (int)lineO, r*8, (int)(lineH+lineO));
-            rayAngle += DEG_TO_RAD/2;
+            g2d.setStroke(new BasicStroke(4));
+            g2d.drawLine(r*4, (int)lineO, r*4, (int)(lineH+lineO));
+            rayAngle += DEG_TO_RAD/4;
             if(rayAngle < 0) rayAngle += PI2;
             if(rayAngle > PI2) rayAngle -= PI2;
         }
@@ -212,7 +210,7 @@ public class Game extends JPanel implements KeyListener, ActionListener {
             deltaY = Math.sin(pa);
         }
 
-        int xOffset = 0, yOffset = 0;
+        int xOffset, yOffset;
         if(deltaX < 0) xOffset = -checkOffset; else xOffset = checkOffset;
         if(deltaY < 0) yOffset = -checkOffset; else yOffset = checkOffset;
 
