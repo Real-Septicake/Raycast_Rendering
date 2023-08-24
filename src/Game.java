@@ -8,8 +8,10 @@ import java.awt.event.KeyListener;
 public class Game extends JPanel implements KeyListener, ActionListener {
 
     static final float[][] COLORS = new float[][]{
-        {162.35f/360f, 0.4679f, 0.8f, 0.6076f},
-        {252.68f/360f, 0.483f , 0.8f, 0.6076f},
+        {162.35f/360f, 0.4679f, 0.80f, 0.6076f},
+        {252.68f/360f, 0.4830f, 0.80f, 0.6076f},
+        {132f   /360f, 0.4830f, 0.69f, 0.61f  },
+        {56f    /360f, 0.4830f, 0.82f, 0.74f  },
     };
 
     static final int[] CHECKER = new int[]{
@@ -165,11 +167,15 @@ public class Game extends JPanel implements KeyListener, ActionListener {
             0,1,1,1,1,1,1,1, 1,1,1,1,1,1,1,1, 1,1,1,1,1,1,1,1, 1,1,1,1,1,1,1,0,
     };
 
+    static final int[][] TEXTURES = new int[][]{
+            CHECKER, BRICK, WINDOW, DOOR
+    };
+
     Timer timer = new Timer(25, this);
 
     static final double DEG_TO_RAD = Math.toRadians(1), PI2 = Math.PI*2, P2 = Math.PI/2, P3 = (Math.PI*3)/2;
 
-    static final int WIDTH = 960, HEIGHT = 523;
+    static final int WIDTH = 956, HEIGHT = 510;
 
     static final int CHECK_OFFSET = 15;
     static final Color BACKGROUND = Color.LIGHT_GRAY;
@@ -194,10 +200,10 @@ public class Game extends JPanel implements KeyListener, ActionListener {
             {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
             {1, 0, 1, 0, 0, 0, 0, 0, 0, 1},
             {1, 0, 1, 1, 0, 0, 0, 0, 0, 1},
-            {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-            {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-            {1, 0, 0, 0, 2, 2, 0, 0, 0, 1},
-            {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+            {1, 0, 0, 0, 0, 0, 0, 0, 0, 3},
+            {1, 0, 0, 0, 0, 0, 0, 0, 0, 4},
+            {1, 0, 0, 0, 2, 2, 4, 0, 0, 3},
+            {1, 0, 0, 0, 0, 0, 3, 0, 0, 1},
             {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
             {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
             {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
@@ -227,15 +233,15 @@ public class Game extends JPanel implements KeyListener, ActionListener {
     }
 
     protected void drawRays(Graphics g){
-        g.setColor(Color.GREEN);
         Graphics2D g2d = (Graphics2D) g;
+        g2d.setStroke(new BasicStroke(8));
         int colorH = 0, colorV = 0;
 
         int r, mx, my, dof;
         double rayX, rayY, rayAngle = pa - DEG_TO_RAD*30, xOffset = 0, yOffset = 0, disT = 0;
         if(rayAngle < 0) rayAngle += PI2;
         if(rayAngle > PI2) rayAngle -= PI2;
-        for(r = 0; r < 240; r++){
+        for(r = 0; r < 120; r++){
             //HORIZONTAL CHECK
             dof = 0;
             double disH = Integer.MAX_VALUE, hx = posX, hy = posY;
@@ -304,11 +310,11 @@ public class Game extends JPanel implements KeyListener, ActionListener {
                     dof++;
                 }
             }
-            g2d.setStroke(new BasicStroke(2));
-            if(disV < disH) { rayX = vx; rayY = vy; g2d.setColor(Color.getHSBColor(COLORS[colorV][0], COLORS[colorV][1], COLORS[colorV][2])); disT = disV; }
-            if(disH < disV) { rayX = hx; rayY = hy; g2d.setColor(Color.getHSBColor(COLORS[colorH][0], COLORS[colorH][1], COLORS[colorH][3])); disT = disH; }
+            int c;
 
-            new Color(116, 218, 188);
+            if(disV < disH) { rayX = vx; rayY = vy; g2d.setColor(Color.getHSBColor(COLORS[c = colorV][0], COLORS[colorV][1], COLORS[colorV][2])); disT = disV; }
+            if(disH < disV) { rayX = hx; rayY = hy; g2d.setColor(Color.getHSBColor(COLORS[c = colorH][0], COLORS[colorH][1], COLORS[colorH][3])); disT = disH; }
+            
             //DRAW WALLS
             double ca = pa - rayAngle;
             if(ca < 0) ca += PI2;
@@ -318,10 +324,13 @@ public class Game extends JPanel implements KeyListener, ActionListener {
             if(lineH > 480) lineH = 480;
             double lineO = (240-lineH/2);
 
-            g2d.setStroke(new BasicStroke(4));
-            g2d.drawLine(r * 4, (int) lineO, r * 4, (int) (lineH + lineO));
-
-            rayAngle += DEG_TO_RAD/4;
+            float textureY = 0;
+            float textureYStep = 32/(float)lineH;
+            for(int y = 0; y < lineH; y+=2){
+                g2d.setColor();
+                g2d.drawLine(r * 8, (int) (y + lineO), r * 8, (int) (y + lineO));
+            }
+            rayAngle += DEG_TO_RAD/2;
             if(rayAngle < 0) rayAngle += PI2;
             if(rayAngle > PI2) rayAngle -= PI2;
         }
