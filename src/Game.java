@@ -312,10 +312,12 @@ public class Game extends JPanel implements KeyListener, ActionListener {
             }
             int c = 0;
 
-            double shade = 1;
+            int shade = 0;
 
-            if(disV < disH) { rayX = vx; rayY = vy; g2d.setColor(Color.getHSBColor(COLORS[c = colorV][0], COLORS[colorV][1], COLORS[colorV][2])); disT = disV; }
-            if(disH < disV) { shade = 0.5; rayX = hx; rayY = hy; g2d.setColor(Color.getHSBColor(COLORS[c = colorH][0], COLORS[colorH][1], COLORS[colorH][3])); disT = disH; }
+            int color = 0;
+
+            if(disV < disH) { rayX = vx; rayY = vy; disT = disV; color = colorV; }
+            if(disH < disV) { shade = 1; rayX = hx; rayY = hy; disT = disH; color = colorH; }
             
             //DRAW WALLS
             double ca = pa - rayAngle;
@@ -333,12 +335,12 @@ public class Game extends JPanel implements KeyListener, ActionListener {
 
             double textureY = textureYOffset*textureYStep;
             int textureX;
-            if(shade == 0.5) { textureX = (int)(rayX/2)%32; if(rayAngle < Math.PI) textureX = 31 - textureX; }
+            if(shade == 1) { textureX = (int)(rayX/2)%32; if(rayAngle < Math.PI) textureX = 31 - textureX; }
             else { textureX = (int)(rayY/2)%32; if(rayAngle > P2 && rayAngle < P3) textureX = 31 - textureX; }
             for(int y = 0; y < lineH; y++){
-                int co = (int) (TEXTURES[c][(int)textureY]
-                        [textureX]*255*shade);
-                g2d.setColor(new Color(co, co, co));
+                int co = (TEXTURES[c][(int)textureY][textureX]);
+                if(co == 1) g2d.setColor(Color.getHSBColor(COLORS[c = color][0], COLORS[color][1], COLORS[color][2+shade]));
+                else g2d.setColor(Color.BLACK);
                 g2d.drawLine(r * 4, (int) (y + lineO), r * 4, (int) (y + lineO));
                 textureY += textureYStep;
                 if(textureY > 31) textureY = 31;
