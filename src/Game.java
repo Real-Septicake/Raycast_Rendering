@@ -10,7 +10,7 @@ public class Game extends JPanel implements KeyListener, ActionListener {
     static final float[][] COLORS = new float[][]{
         {162.35f/360f, 0.4679f, 0.80f, 0.6076f},
         {252.68f/360f, 0.4830f, 0.80f, 0.6076f},
-        {132f   /360f, 0.4830f, 0.69f, 0.61f  },
+        {132f   /360f, 0.4830f, 0.69f, 0.59f  },
         {56f    /360f, 0.4830f, 0.82f, 0.74f  },
     };
 
@@ -193,21 +193,39 @@ public class Game extends JPanel implements KeyListener, ActionListener {
     static JFrame game;
 
     public Game(){
+        for(int i = 0; i < WORLD.length; i++){
+            temp[i] = WORLD[i].clone();
+        }
         timer.start();
     }
 
+    static final int[][] FLOOR = new int[][]{
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+            {0, 1, 1, 1, 1, 1, 1, 1, 1, 0},
+            {0, 1, 1, 1, 1, 1, 1, 1, 1, 0},
+            {0, 1, 1, 0, 1, 0, 0, 1, 1, 0},
+            {0, 1, 1, 0, 1, 1, 0, 1, 1, 0},
+            {0, 1, 1, 0, 0, 0, 0, 1, 1, 0},
+            {0, 1, 1, 1, 1, 1, 1, 1, 1, 0},
+            {0, 1, 1, 1, 1, 1, 1, 1, 1, 0},
+            {0, 1, 1, 1, 1, 1, 1, 1, 1, 0},
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    };
+
     static final int[][] WORLD = new int[][]{
             {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-            {1, 0, 1, 0, 0, 0, 0, 0, 0, 1},
-            {1, 0, 1, 1, 0, 0, 0, 0, 0, 1},
             {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
             {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-            {1, 0, 0, 0, 2, 1, 1, 0, 0, 1},
-            {1, 0, 0, 0, 0, 0, 1, 0, 0, 1},
+            {1, 0, 0, 3, 4, 2, 2, 0, 0, 1},
+            {1, 0, 0, 1, 0, 0, 3, 0, 0, 1},
+            {1, 0, 0, 1, 1, 2, 2, 0, 0, 1},
+            {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
             {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
             {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
             {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
     };
+
+    static int[][] temp = new int[WORLD.length][];
 
     public static void main(String[] args) {
         game = new JFrame("rendering sucks");
@@ -264,8 +282,8 @@ public class Game extends JPanel implements KeyListener, ActionListener {
             while (dof < 8) {
                 mx = (int) rayX >> 6;
                 my = (int) rayY >> 6;
-                if (mx < WORLD[0].length && my < WORLD.length && mx > -1 && my > -1 && WORLD[my][mx] > 0) {
-                    colorH = WORLD[my][mx]-1;
+                if (mx < temp[0].length && my < temp.length && mx > -1 && my > -1 && temp[my][mx] > 0) {
+                    colorH = temp[my][mx]-1;
                     hx = rayX;
                     hy = rayY;
                     disH = distance(posX, posY, hx, hy, rayAngle);
@@ -298,8 +316,8 @@ public class Game extends JPanel implements KeyListener, ActionListener {
             while (dof < 8) {
                 mx = (int) rayX >> 6;
                 my = (int) rayY >> 6;
-                if (mx < WORLD[0].length && my < WORLD.length && mx > -1 && my > -1 && WORLD[my][mx] > 0) {
-                    colorV = WORLD[my][mx]-1;
+                if (mx < temp[0].length && my < temp.length && mx > -1 && my > -1 && temp[my][mx] > 0) {
+                    colorV = temp[my][mx]-1;
                     vx = rayX;
                     vy = rayY;
                     disV = distance(posX, posY, vx, vy, rayAngle);
@@ -370,6 +388,12 @@ public class Game extends JPanel implements KeyListener, ActionListener {
             case KeyEvent.VK_S -> s = true;
             case KeyEvent.VK_A -> a = true;
             case KeyEvent.VK_D -> d = true;
+            case KeyEvent.VK_E -> {
+                int xOffset = (deltaX < 0)?-25:25, yOffset = (deltaY < 0)?-25:25;
+                int ipx = (int)(posX/64), ipx_add_xo = (int)(posX + xOffset)/64;
+                int ipy = (int)(posY/64), ipy_add_yo = (int)(posY + yOffset)/64;
+                if(temp[ipy_add_yo][ipx_add_xo] == 4) { temp[ipy_add_yo][ipx_add_xo] = 0; }
+            }
         }
     }
 
@@ -410,12 +434,12 @@ public class Game extends JPanel implements KeyListener, ActionListener {
         int ipy = (int) (posY/SQUARE_SIZE), ipy_add_yo = (int) (posY + yOffset)/SQUARE_SIZE, ipy_sub_yo = (int) (posY - yOffset)/SQUARE_SIZE;
 
         if(w){
-            if(WORLD[ipy_add_yo][ipx] == 0) posY += Math.sin(pa) * PLAYER_STEP;
-            if(WORLD[ipy][ipx_add_xo] == 0) posX += Math.cos(pa) * PLAYER_STEP;
+            if(temp[ipy_add_yo][ipx] == 0) posY += Math.sin(pa) * PLAYER_STEP;
+            if(temp[ipy][ipx_add_xo] == 0) posX += Math.cos(pa) * PLAYER_STEP;
         }
         if(s){
-            if(WORLD[ipy_sub_yo][ipx] == 0) posY -= Math.sin(pa)*PLAYER_STEP;
-            if(WORLD[ipy][ipx_sub_xo] == 0) posX -= Math.cos(pa)*PLAYER_STEP;
+            if(temp[ipy_sub_yo][ipx] == 0) posY -= Math.sin(pa)*PLAYER_STEP;
+            if(temp[ipy][ipx_sub_xo] == 0) posX -= Math.cos(pa)*PLAYER_STEP;
         }
         repaint();
     }
