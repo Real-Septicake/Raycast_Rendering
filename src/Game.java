@@ -199,6 +199,19 @@ public class Game extends JPanel implements KeyListener, ActionListener {
         timer.start();
     }
 
+    static final int[][] WORLD = new int[][]{
+            {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+            {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+            {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+            {1, 0, 0, 3, 4, 2, 2, 0, 0, 1},
+            {1, 0, 0, 1, 0, 0, 3, 0, 0, 1},
+            {1, 0, 0, 1, 1, 2, 2, 0, 0, 1},
+            {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+            {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+            {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+            {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+    };
+
     static final int[][] FLOOR = new int[][]{
             {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
             {0, 1, 1, 1, 1, 1, 1, 1, 1, 0},
@@ -212,17 +225,17 @@ public class Game extends JPanel implements KeyListener, ActionListener {
             {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
     };
 
-    static final int[][] WORLD = new int[][]{
-            {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-            {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-            {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-            {1, 0, 0, 3, 4, 2, 2, 0, 0, 1},
-            {1, 0, 0, 1, 0, 0, 3, 0, 0, 1},
-            {1, 0, 0, 1, 1, 2, 2, 0, 0, 1},
-            {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-            {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-            {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-            {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+    static final int[][] CEILING = new int[][]{
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+            {0, 1, 1, 1, 1, 1, 1, 1, 1, 0},
+            {0, 1, 1, 1, 1, 1, 1, 1, 1, 0},
+            {0, 1, 1, 0, 1, 0, 0, 1, 1, 0},
+            {0, 1, 1, 0, 1, 1, 0, 1, 1, 0},
+            {0, 1, 1, 0, 0, 0, 0, 1, 1, 0},
+            {0, 1, 1, 1, 1, 1, 1, 1, 1, 0},
+            {0, 1, 1, 1, 1, 1, 1, 1, 1, 0},
+            {0, 1, 1, 1, 1, 1, 1, 1, 1, 0},
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
     };
 
     static int[][] temp = new int[WORLD.length][];
@@ -250,15 +263,19 @@ public class Game extends JPanel implements KeyListener, ActionListener {
         return Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
     }
 
+    double fixAngle(double a){
+        if(a < 0) a += PI2;
+        if(a > PI2) a -= PI2;
+        return a;
+    }
+
     protected void drawRays(Graphics g){
         Graphics2D g2d = (Graphics2D) g;
         g2d.setStroke(new BasicStroke(4));
         int colorH = 0, colorV = 0;
 
         int r, mx, my, dof;
-        double rayX, rayY, rayAngle = pa - DEG_TO_RAD*30, xOffset = 0, yOffset = 0, disT = 0;
-        if(rayAngle < 0) rayAngle += PI2;
-        if(rayAngle > PI2) rayAngle -= PI2;
+        double rayX, rayY, rayAngle = fixAngle(pa - DEG_TO_RAD*30), xOffset = 0, yOffset = 0, disT = 0;
         for(r = 0; r < 240; r++){
             //HORIZONTAL CHECK
             dof = 0;
@@ -338,9 +355,7 @@ public class Game extends JPanel implements KeyListener, ActionListener {
             if(disH < disV) { shade = 1; rayX = hx; rayY = hy; disT = disH; c = color = colorH; }
             
             //DRAW WALLS
-            double ca = pa - rayAngle;
-            if(ca < 0) ca += PI2;
-            if(ca > PI2) ca -= PI2;
+            double ca = fixAngle(pa - rayAngle);
             disT *= Math.cos(ca);
             double lineH = (SQUARE_SIZE*480)/disT;
             double textureYStep = 32/(float)lineH;
@@ -352,20 +367,35 @@ public class Game extends JPanel implements KeyListener, ActionListener {
             double lineO = (240-lineH/2);
 
             double textureY = textureYOffset*textureYStep;
-            int textureX;
+            double textureX;
             if(shade == 1) { textureX = (int)(rayX/2)%32; if(rayAngle < Math.PI) textureX = 31 - textureX; }
             else { textureX = (int)(rayY/2)%32; if(rayAngle > P2 && rayAngle < P3) textureX = 31 - textureX; }
             for(int y = 0; y < lineH; y++){
-                int co = (TEXTURES[c][(int)textureY][textureX]);
+                int co = (TEXTURES[c][(int)textureY][(int) textureX]);
                 if(co == 1) g2d.setColor(Color.getHSBColor(COLORS[color][0], COLORS[color][1], COLORS[color][2+shade]));
                 else g2d.setColor(Color.BLACK);
                 g2d.drawLine(r * 4, (int) (y + lineO), r * 4, (int) (y + lineO));
                 textureY += textureYStep;
                 if(textureY > 31) textureY = 31;
             }
-            rayAngle += DEG_TO_RAD/4;
-            if(rayAngle < 0) rayAngle += PI2;
-            if(rayAngle > PI2) rayAngle -= PI2;
+
+            for(int y = (int)(lineO + lineH); y < 480; y++){
+                double dy = y - (480/2.0), raFix = Math.cos(pa - rayAngle);
+                textureX = posX/2 + Math.cos(rayAngle) * 238 * 32 / dy / raFix;
+                textureY = posY/2 - Math.sin(rayAngle) * 238 * 32 / dy / raFix;
+
+                int mp = FLOOR[Math.min((int) Math.abs(textureY / 32), 9)][(int) Math.abs(textureX / 32)];
+                int co = TEXTURES[mp][(int)textureY & 31][(int)textureX & 31] * 255;
+                g2d.setColor(new Color(co, co, co));
+                g2d.drawLine(r * 4, y, r * 4, y);
+
+                mp = CEILING[Math.min((int) Math.abs(textureY / 32), 9)][(int) Math.abs(textureX / 32)];
+                co = TEXTURES[mp][(int)textureY & 31][(int)textureX & 31] * 255;
+                g2d.setColor(new Color(co, co, co));
+                g2d.drawLine(r * 4, 480 - y, r * 4, 480 - y);
+            }
+
+            rayAngle = fixAngle(rayAngle + DEG_TO_RAD/4);
         }
     }
 
@@ -416,7 +446,7 @@ public class Game extends JPanel implements KeyListener, ActionListener {
         if(d){
             pa += ROTATE_STEP;
             if (pa > PI2) pa -= PI2;
-            deltaY = Math.sin(pa);
+            deltaX = Math.cos(pa);
             deltaY = Math.sin(pa);
         }
         if(a){
